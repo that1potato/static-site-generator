@@ -23,7 +23,7 @@ class HTMLNode:
             return ''
         
         output = ''
-        for k, v in self.props:
+        for k, v in self.props.items():
             output += f' {k}=\"{v}\"'
         return output
     
