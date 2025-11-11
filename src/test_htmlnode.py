@@ -1,6 +1,6 @@
 import unittest
 
-from htmlnode import HTMLNode
+from htmlnode import HTMLNode, LeafNode
 
 
 class TestHTMLNode(unittest.TestCase):
@@ -38,6 +38,47 @@ class TestHTMLNode(unittest.TestCase):
         tokens = out.strip().split(" ") if out else []
         expected = {"href=\"https://example.com\"", "target=\"_blank\""}
         self.assertEqual(set(tokens), expected)
+
+
+class TestLeafNode(unittest.TestCase):
+    def test_leaf_to_html_p(self):
+        node = LeafNode("p", "Hello, world!")
+        self.assertEqual(node.to_html(), "<p>Hello, world!</p>")
+    
+    def test_leaf_to_html_no_tag_returns_raw_value(self):
+        node = LeafNode(None, "Just text")
+        self.assertEqual(node.to_html(), "Just text")
+
+    def test_leaf_to_html_with_props_contains_all_attributes(self):
+        props = {"href": "https://example.com", "target": "_blank"}
+        node = LeafNode("a", "link", props=props)
+        html = node.to_html()
+        self.assertTrue(html.startswith("<a"))
+        self.assertTrue(html.endswith(">link</a>"))
+        self.assertIn(' href="https://example.com"', html)
+        self.assertIn(' target="_blank"', html)
+
+    def test_leaf_to_html_empty_props_has_no_extra_space(self):
+        node = LeafNode("span", "x", props={})
+        self.assertEqual(node.to_html(), "<span>x</span>")
+
+    def test_leaf_to_html_value_none_raises(self):
+        node = LeafNode("p", None)
+        with self.assertRaises(ValueError):
+            node.to_html()
+
+    def test_leaf_children_assignment_rules(self):
+        node = LeafNode("p", "x")
+        # Always exposes children as None
+        self.assertIsNone(node.children)
+        # Allow assigning None or empty sequences
+        node.children = None
+        self.assertIsNone(node.children)
+        node.children = []
+        self.assertIsNone(node.children)
+        # Forbid assigning non-empty children
+        with self.assertRaises(AttributeError):
+            node.children = [LeafNode("span", "y")]
 
 
 if __name__ == "__main__":
