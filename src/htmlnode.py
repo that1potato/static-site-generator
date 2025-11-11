@@ -76,6 +76,8 @@ class ParentNode(HTMLNode):
             raise ValueError('ParentNode must have a tag')
         if self.children is None or len(self.children) == 0:
             raise ValueError('ParentNode must have a child node')
-        
+        # Recursively render all children and wrap with this node's tag
+        children_html = ''
         for c in self.children:
-            c.to_html()
+            children_html += c.to_html()
+        return f'<{self.tag}{super().props_to_html()}>{children_html}</{self.tag}>'
