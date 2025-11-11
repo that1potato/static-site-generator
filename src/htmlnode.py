@@ -47,3 +47,11 @@ class LeafNode(HTMLNode):
         # Allow None/empty but forbid any non-empty assignment
         if value not in (None, [], ()):  # treat empty sequences as None-equivalent
             raise AttributeError("LeafNode cannot have children")
+
+    def to_html(self):
+        if self.value is None:
+            raise ValueError('leaf node must have a value')
+        if self.tag is None:
+            return self.value   # return value as raw text if no tag
+        
+        return f'<{self.tag}{super().props_to_html()}>{self.value}</{self.tag}>'
