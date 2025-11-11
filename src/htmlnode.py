@@ -1,7 +1,7 @@
-'''
-Nodes in an HTML document tree
-'''
 class HTMLNode:
+    '''
+    Nodes in an HTML document tree
+    '''
     def __init__(self, tag=None, value=None, children=None, props=None):
         '''
         tag - A string representing the HTML tag name (e.g. "p", "a", "h1", etc.)
@@ -29,3 +29,21 @@ class HTMLNode:
     
     def __repr__(self):
         return f'HTMLNode({self.tag}, {self.value}, {self.children}, {self.props})'
+
+
+class LeafNode(HTMLNode):
+    def __init__(self, tag, value, props=None):
+        '''
+        leaf node cannot have children
+        '''
+        super().__init__(tag=tag, value=value, children=None, props=props)
+
+    @property
+    def children(self):
+        return None
+
+    @children.setter
+    def children(self, value):
+        # Allow None/empty but forbid any non-empty assignment
+        if value not in (None, [], ()):  # treat empty sequences as None-equivalent
+            raise AttributeError("LeafNode cannot have children")
