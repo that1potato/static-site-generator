@@ -108,19 +108,65 @@ class TestSplitNodesDelimiter(unittest.TestCase):
 
 
 class TestExtractMarkdownImages(unittest.TestCase):
-	def test_extract_markdown_images(self):
-		matches = extract_markdown_images(
-			"This is text with an ![image](https://i.imgur.com/zjjcJKZ.png)"
-		)
-		self.assertListEqual([("image", "https://i.imgur.com/zjjcJKZ.png")], matches)
+    def test_extract_markdown_images(self):
+        matches = extract_markdown_images(
+            "This is text with an ![image](https://i.imgur.com/zjjcJKZ.png)"
+        )
+        self.assertListEqual([("image", "https://i.imgur.com/zjjcJKZ.png")], matches)
+
+    def test_multiple_images(self):
+        matches = extract_markdown_images(
+            "Gallery: ![one](https://imgs.ex/1.png) and ![two](https://imgs.ex/2.jpg)"
+        )
+        self.assertListEqual(
+            [("one", "https://imgs.ex/1.png"), ("two", "https://imgs.ex/2.jpg")],
+            matches,
+        )
+
+    def test_image_with_bracketed_url_and_title(self):
+        matches = extract_markdown_images(
+            'Diagram ![flow](<https://imgs.ex/diagram v1.svg> "diagram v1")'
+        )
+        self.assertListEqual(
+            [("flow", "https://imgs.ex/diagram v1.svg")],
+            matches,
+        )
+
+    def test_image_with_empty_alt_text(self):
+        matches = extract_markdown_images("Missing alt ![](https://imgs.ex/no-alt.png)")
+        self.assertListEqual([("", "https://imgs.ex/no-alt.png")], matches)
 
 
 class TestExtractMarkdownLinks(unittest.TestCase):
-	def test_extract_markdown_links(self):
-		matches = extract_markdown_links(
-			"This is text with an [link](https://i.imgur.com/zjjcJKZ.png)"
-		)
-		self.assertListEqual([("link", "https://i.imgur.com/zjjcJKZ.png")], matches)
+    def test_extract_markdown_links(self):
+        matches = extract_markdown_links(
+            "This is text with an [link](https://i.imgur.com/zjjcJKZ.png)"
+        )
+        self.assertListEqual([("link", "https://i.imgur.com/zjjcJKZ.png")], matches)
+
+    def test_multiple_links(self):
+        matches = extract_markdown_links(
+            "Docs at [boot](https://www.boot.dev) or [gh](https://github.com/bootdotdev)"
+        )
+        self.assertListEqual(
+            [("boot", "https://www.boot.dev"), ("gh", "https://github.com/bootdotdev")],
+            matches,
+        )
+
+    def test_link_with_bracketed_url_and_title(self):
+        matches = extract_markdown_links(
+            "Refer to [spec](<https://specs.ex/1.0 draft.pdf> 'draft') for details"
+        )
+        self.assertListEqual(
+            [("spec", "https://specs.ex/1.0 draft.pdf")],
+            matches,
+        )
+
+    def test_link_with_empty_text(self):
+        matches = extract_markdown_links(
+            "Bare [](<https://example.com/resource>) link text allowed"
+        )
+        self.assertListEqual([("", "https://example.com/resource")], matches)
 
 
 if __name__ == "__main__":
