@@ -124,3 +124,17 @@ def _split_nodes_by_pattern(old_nodes, pattern, new_text_type):
         if last_index < len(text):
             new_nodes.append(TextNode(text[last_index:], TextType.TEXT))
     return new_nodes
+
+
+def text_to_textnodes(text):
+    nodes = [TextNode(text, TextType.TEXT)]
+    nodes = split_nodes_image(nodes)
+    nodes = split_nodes_link(nodes)
+    nodes = split_nodes_delimiter(nodes, "`", TextType.CODE)
+    # Support both ** and __ for bold
+    nodes = split_nodes_delimiter(nodes, "**", TextType.BOLD)
+    nodes = split_nodes_delimiter(nodes, "__", TextType.BOLD)
+    # Support both * and _ for italic
+    nodes = split_nodes_delimiter(nodes, "*", TextType.ITALIC)
+    nodes = split_nodes_delimiter(nodes, "_", TextType.ITALIC)
+    return nodes
