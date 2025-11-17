@@ -27,3 +27,21 @@ class TestMarkdownToBlocks(unittest.TestCase):
             "- This is a list\n- with items",
             ],
         )
+
+	def test_single_newline_does_not_split(self):
+		md = "First line\nSecond line"
+		self.assertEqual(
+			markdown_to_blocks(md), ["First line\nSecond line"]
+		)
+
+	def test_leading_trailing_blanklines_ignored(self):
+		md = "\n\nA\n\nB\n\n"
+		self.assertEqual(markdown_to_blocks(md), ["A", "B"])
+
+	def test_two_separators_three_blocks(self):
+		md = "A\n\nB\n\nC"
+		self.assertEqual(markdown_to_blocks(md), ["A", "B", "C"])
+
+	def test_empty_or_whitespace_only_yields_empty_list(self):
+		self.assertEqual(markdown_to_blocks(""), [])
+		self.assertEqual(markdown_to_blocks(" \n\t \n\n  \n"), [])
