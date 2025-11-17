@@ -117,7 +117,7 @@ class TestExtractMarkdownImages(unittest.TestCase):
 
 class TestExtractMarkdownLinks(unittest.TestCase):
 	def test_extract_markdown_links(self):
-		matches = extract_markdown_images(
+		matches = extract_markdown_links(
 			"This is text with an [link](https://i.imgur.com/zjjcJKZ.png)"
 		)
 		self.assertListEqual([("link", "https://i.imgur.com/zjjcJKZ.png")], matches)
