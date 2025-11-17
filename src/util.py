@@ -79,4 +79,8 @@ def extract_markdown_links(text):
 	    \)
 	''', re.VERBOSE)
 	matches = re.findall(pattern, text)
-	return matches
+	return [
+	    (link_text, (u_bracketed or u_plain))
+	    for link_text, u_bracketed, u_plain, _title in matches
+	    if (u_bracketed or u_plain)
+	]
