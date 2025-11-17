@@ -4,6 +4,27 @@ from htmlnode import LeafNode
 from textnode import TextNode, TextType
 
 
+IMAGE_PATTERN = re.compile(
+    r'!\[([^\]]*)\]\(\s*'
+    r'(?:<([^>]+)>|([^)\s]+))\s*'
+    r'(?:["\']([^"\']*)["\']\s*)?'
+    r'\)'
+)
+
+LINK_PATTERN = re.compile(
+    r'''
+    \[([^\]]*)\]
+    \(
+      \s*
+      (?:<([^>]+)>|([^\s)]+))
+      \s*
+      (?:["']([^"']*)["']\s*)?
+    \)
+    ''',
+    re.VERBOSE,
+)
+
+
 def text_node_to_html_node(text_node: TextNode):
     '''
     convert a TextNode to an HTMLNode
@@ -54,13 +75,7 @@ def extract_markdown_images(text):
 	text = "This is text with a ![rick roll](https://i.imgur.com/aKaOqIh.gif) and ![obi wan](https://i.imgur.com/fJRm4Vk.jpeg)"
 	-> [("rick roll", "https://i.imgur.com/aKaOqIh.gif"), ("obi wan", "https://i.imgur.com/fJRm4Vk.jpeg")]
 	'''
-	pattern = re.compile(
-	    r'!\[([^\]]*)\]\(\s*'               # alt text in [...]
-	    r'(?:<([^>]+)>|([^)\s]+))\s*'       # either <url> (group 2) or url (group 3)
-	    r'(?:["\']([^"\']*)["\']\s*)?'      # optional title in " or ' (group 4)
-	    r'\)'
-	)
-	matches = re.findall(pattern, text)
+	matches = IMAGE_PATTERN.findall(text)
 	return [(alt, (u_br or u_plain)) for alt, u_br, u_plain, _title in matches]
 
 
@@ -69,18 +84,43 @@ def extract_markdown_links(text):
 	text = "This is text with a link [to boot dev](https://www.boot.dev) and [to youtube](https://www.youtube.com/@bootdotdev)"
 	-> [("to boot dev", "https://www.boot.dev"), ("to youtube", "https://www.youtube.com/@bootdotdev")]
 	'''
-	pattern = re.compile(r'''
-	    \[([^\]]*)\]                	# 1: link text (between [])
-	    \(
-	      \s*
-	      (?:<([^>]+)>|([^\s)]+))  		# 2: url if <...> OR 3: url without brackets
-	      \s*
-	      (?:["']([^"']*)["']\s*)? 		# 4: optional title in " or '
-	    \)
-	''', re.VERBOSE)
-	matches = re.findall(pattern, text)
+	matches = LINK_PATTERN.findall(text)
 	return [
 	    (link_text, (u_bracketed or u_plain))
 	    for link_text, u_bracketed, u_plain, _title in matches
 	    if (u_bracketed or u_plain)
 	]
+
+
+def split_nodes_image(old_nodes):
+    return _split_nodes_by_pattern(old_nodes, IMAGE_PATTERN, TextType.IMAGE)
+
+
+def split_nodes_link(old_nodes):
+    return _split_nodes_by_pattern(old_nodes, LINK_PATTERN, TextType.LINK)
+
+
+def _split_nodes_by_pattern(old_nodes, pattern, new_text_type):
+    new_nodes = []
+    for old_node in old_nodes:
+        if old_node.text_type != TextType.TEXT:
+            new_nodes.append(old_node)
+            continue
+        text = old_node.text
+        last_index = 0
+        found_match = False
+        for match in pattern.finditer(text):
+            found_match = True
+            start, end = match.span()
+            if start > last_index:
+                new_nodes.append(TextNode(text[last_index:start], TextType.TEXT))
+            match_text = match.group(1)
+            url = match.group(2) or match.group(3)
+            new_nodes.append(TextNode(match_text, new_text_type, url))
+            last_index = end
+        if not found_match:
+            new_nodes.append(old_node)
+            continue
+        if last_index < len(text):
+            new_nodes.append(TextNode(text[last_index:], TextType.TEXT))
+    return new_nodes
