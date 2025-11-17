@@ -1,3 +1,5 @@
+import re
+
 from htmlnode import LeafNode
 from textnode import TextNode, TextType
 
@@ -45,3 +47,36 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
                 split_nodes.append(TextNode(sections[i], text_type))
         new_nodes.extend(split_nodes)
     return new_nodes
+
+
+def extract_markdown_images(text):
+	'''
+	text = "This is text with a ![rick roll](https://i.imgur.com/aKaOqIh.gif) and ![obi wan](https://i.imgur.com/fJRm4Vk.jpeg)"
+	-> [("rick roll", "https://i.imgur.com/aKaOqIh.gif"), ("obi wan", "https://i.imgur.com/fJRm4Vk.jpeg")]
+	'''
+	pattern = re.compile(
+	    r'!\[([^\]]*)\]\(\s*'               # alt text in [...]
+	    r'(?:<([^>]+)>|([^)\s]+))\s*'       # either <url> (group 2) or url (group 3)
+	    r'(?:["\']([^"\']*)["\']\s*)?'      # optional title in " or ' (group 4)
+	    r'\)'
+	)
+	matches = re.findall(pattern, text)
+	return [(alt, (u_br or u_plain)) for alt, u_br, u_plain, _title in matches]
+
+
+def extract_markdown_links(text):
+	'''
+	text = "This is text with a link [to boot dev](https://www.boot.dev) and [to youtube](https://www.youtube.com/@bootdotdev)"
+	-> [("to boot dev", "https://www.boot.dev"), ("to youtube", "https://www.youtube.com/@bootdotdev")]
+	'''
+	pattern = re.compile(r'''
+	    \[([^\]]*)\]                	# 1: link text (between [])
+	    \(
+	      \s*
+	      (?:<([^>]+)>|([^\s)]+))  		# 2: url if <...> OR 3: url without brackets
+	      \s*
+	      (?:["']([^"']*)["']\s*)? 		# 4: optional title in " or '
+	    \)
+	''', re.VERBOSE)
+	matches = re.findall(pattern, text)
+	return matches
