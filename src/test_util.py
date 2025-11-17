@@ -1,7 +1,14 @@
 import unittest
 
 from textnode import TextNode, TextType
-from util import text_node_to_html_node, split_nodes_delimiter, extract_markdown_images, extract_markdown_links
+from util import (
+    text_node_to_html_node,
+    split_nodes_delimiter,
+    extract_markdown_images,
+    extract_markdown_links,
+    split_nodes_image,
+    split_nodes_link,
+)
 
 
 class TestTextNodeToHTMLNode(unittest.TestCase):
@@ -167,6 +174,61 @@ class TestExtractMarkdownLinks(unittest.TestCase):
             "Bare [](<https://example.com/resource>) link text allowed"
         )
         self.assertListEqual([("", "https://example.com/resource")], matches)
+
+
+class TestSplitNodesImage(unittest.TestCase):
+    def test_basic_image_split(self):
+        nodes = [TextNode("Intro ![alt](https://imgs.ex/a.png) outro", TextType.TEXT)]
+        out = split_nodes_image(nodes)
+        self.assertEqual(
+            out,
+            [
+                TextNode("Intro ", TextType.TEXT),
+                TextNode("alt", TextType.IMAGE, "https://imgs.ex/a.png"),
+                TextNode(" outro", TextType.TEXT),
+            ],
+        )
+
+    def test_multiple_images_and_non_text_nodes(self):
+        nodes = [
+            TextNode("![one](https://imgs.ex/1.png) + ![two](https://imgs.ex/2.png)", TextType.TEXT),
+            TextNode("plain", TextType.BOLD),
+        ]
+        out = split_nodes_image(nodes)
+        self.assertEqual(
+            out,
+            [
+                TextNode("one", TextType.IMAGE, "https://imgs.ex/1.png"),
+                TextNode(" + ", TextType.TEXT),
+                TextNode("two", TextType.IMAGE, "https://imgs.ex/2.png"),
+                TextNode("plain", TextType.BOLD),
+            ],
+        )
+
+
+class TestSplitNodesLink(unittest.TestCase):
+    def test_basic_link_split(self):
+        nodes = [
+            TextNode(
+                "See [boot dev](https://www.boot.dev) for [more](https://example.com/more)",
+                TextType.TEXT,
+            )
+        ]
+        out = split_nodes_link(nodes)
+        self.assertEqual(
+            out,
+            [
+                TextNode("See ", TextType.TEXT),
+                TextNode("boot dev", TextType.LINK, "https://www.boot.dev"),
+                TextNode(" for ", TextType.TEXT),
+                TextNode("more", TextType.LINK, "https://example.com/more"),
+            ],
+        )
+
+    def test_no_links_returns_original_nodes(self):
+        nodes = [TextNode("Just text", TextType.TEXT)]
+        out = split_nodes_link(nodes)
+        self.assertEqual(out, nodes)
 
 
 if __name__ == "__main__":
