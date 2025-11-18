@@ -6,8 +6,8 @@ def copy(source, destination):
 	'''
 	copies all the contents from a source directory to a destination directory (in our case, static to public)
 	'''
-	if not os.path.isdir(source) or not os.path.isdir(destination):
-		print('not a directory')
+	if not os.path.isdir(source):
+		print('source is not a directory')
 		return
 
 	# delete all files in detination
