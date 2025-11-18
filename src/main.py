@@ -1,11 +1,6 @@
 import os
 import shutil
 
-from textnode import TextNode, TextType
-
-node = TextNode('ur mom', TextType.BOLD)
-print(node)
-
 
 def copy(source, destination):
 	'''
@@ -42,3 +37,13 @@ def copy(source, destination):
 			# logging the path of each file copied for debugging
 			print(f"Copied '{source_path}' to '{destination_path}'")
 	return
+
+
+def main():
+	static_path = 'static'
+	public_path = 'public'
+	copy(static_path, public_path)
+
+
+if __name__ == '__main__':
+	main()
