@@ -1,6 +1,9 @@
 import os
 import shutil
 
+from block_util import markdown_to_html_node
+from src.inline_util import extract_title
+
 
 def copy(source, destination):
 	'''
@@ -37,6 +40,24 @@ def copy(source, destination):
 			# logging the path of each file copied for debugging
 			print(f"Copied '{source_path}' to '{destination_path}'")
 	return
+
+
+def generate_page(from_path, template_path, dest_path):
+	print(f"Generating page from {from_path} to {dest_path} using {template_path}")
+	with open(from_path, "r", encoding="utf-8") as source_file:
+		markdown_content = source_file.read()
+	with open(template_path, "r", encoding="utf-8") as template_file:
+		template_content = template_file.read()
+
+	html_string = markdown_to_html_node(markdown_content).to_html()
+	title = extract_title(markdown_content)
+	output = template_content.replace("{{ Title }}", title).replace("{{ Content }}", html_string)
+
+	dest_dir = os.path.dirname(dest_path)
+	if dest_dir:
+		os.makedirs(dest_dir, exist_ok=True)
+	with open(dest_path, "w", encoding="utf-8") as dest_file:
+		dest_file.write(output)
 
 
 def main():
