@@ -59,11 +59,10 @@ def generate_page(from_path, template_path, dest_path, base_path):
 
 	html_string = markdown_to_html_node(markdown_content).to_html()
 	title = extract_title(markdown_content)
-	output = template_content\
-		.replace("{{ Title }}", title)\
-		.replace("{{ Content }}", html_string)\
-		.replace('href="/', 'href="' + base_path)\
-		.replace('src="/', 'src="' + base_path)
+	output = template_content.replace("{{ Title }}", title)
+	output = output.replace("{{ Content }}", html_string)
+	output = output.replace('href="/', 'href="' + base_path)
+	output = output.replace('src="/', 'src="' + base_path)
 
 	dest_dir = os.path.dirname(dest_path)
 	if dest_dir:
