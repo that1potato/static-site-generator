@@ -1,4 +1,5 @@
 import os
+import sys
 import shutil
 
 from block_util import markdown_to_html_node
@@ -77,10 +78,15 @@ def generate_pages_recursive(content_dir, template_path, dest_dir):
 
 
 def main():
-	static_path = 'static'
-	public_path = 'public'
-	content_path = 'content'
-	template_path = 'template.html'
+	if len(sys.argv) > 1:
+		base_path = os.path.abspath(sys.argv[1])
+	else:
+		# default to the project root (parent directory of this file's folder)
+		base_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+	static_path = os.path.join(base_path, 'static')
+	public_path = os.path.join(base_path, 'public')
+	content_path = os.path.join(base_path, 'content')
+	template_path = os.path.join(base_path, 'template.html')
 	copy(static_path, public_path)
 	generate_pages_recursive(content_path, template_path, public_path)
 
