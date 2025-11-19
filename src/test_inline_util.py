@@ -6,6 +6,7 @@ from inline_util import (
     split_nodes_delimiter,
     extract_markdown_images,
     extract_markdown_links,
+    extract_title,
     split_nodes_image,
     split_nodes_link,
     text_to_textnodes,
@@ -175,6 +176,33 @@ class TestExtractMarkdownLinks(unittest.TestCase):
             "Bare [](<https://example.com/resource>) link text allowed"
         )
         self.assertListEqual([("", "https://example.com/resource")], matches)
+
+
+class TestExtractTitle(unittest.TestCase):
+	def test_extract_title(self):
+		md = '# example title '
+		self.assertEqual('example title', extract_title(md))
+
+	def test_extract_title_double_space(self):
+		md = '# example  title '
+		self.assertEqual('example  title', extract_title(md))
+
+	def test_no_title(self):
+		md = 'no title'
+		with self.assertRaises(ValueError):
+			extract_title(md)
+
+	def test_extract_title_with_whitespace(self):
+		md = '#    a title with extra whitespace   '
+		self.assertEqual('a title with extra whitespace', extract_title(md))
+
+	def test_extract_title_with_numbers(self):
+		md = '# 123 title with numbers 456 '
+		self.assertEqual('123 title with numbers 456', extract_title(md))
+
+	def test_extract_title_with_special_characters(self):
+		md = '# title with *&^%$#@! characters'
+		self.assertEqual('title with *&^%$#@! characters', extract_title(md))
 
 
 class TestSplitNodesImage(unittest.TestCase):

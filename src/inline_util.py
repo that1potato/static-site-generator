@@ -92,6 +92,20 @@ def extract_markdown_links(text):
 	]
 
 
+def extract_title(markdown):
+	'''
+	pull the h1 header from the markdown file (the line that starts with a single #) and return it.
+	raise an exception if no h1 header
+	'''
+	markdown = markdown.strip()
+	strings = markdown.split(' ')
+	if strings[0] != '#':
+		raise ValueError('h1 header not detected')
+
+	extracted_title = markdown[1:]
+	return extracted_title.strip()
+
+
 def split_nodes_image(old_nodes):
     return _split_nodes_by_pattern(old_nodes, IMAGE_PATTERN, TextType.IMAGE)
 
