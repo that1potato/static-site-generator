@@ -43,7 +43,7 @@ def copy(source, destination):
 	return
 
 
-def generate_page(from_path, template_path, dest_path):
+def generate_page(base_path, from_path, template_path, dest_path):
 	print(f"Generating page from {from_path} to {dest_path} using {template_path}")
 	with open(from_path, "r", encoding="utf-8") as source_file:
 		markdown_content = source_file.read()
@@ -52,7 +52,11 @@ def generate_page(from_path, template_path, dest_path):
 
 	html_string = markdown_to_html_node(markdown_content).to_html()
 	title = extract_title(markdown_content)
-	output = template_content.replace("{{ Title }}", title).replace("{{ Content }}", html_string)
+	output = template_content\
+		.replace("{{ Title }}", title)\
+		.replace("{{ Content }}", html_string)\
+		.replace('href="/', f'href="{base_path}')\
+		.replace('src="/', f'src="{base_path}')
 
 	dest_dir = os.path.dirname(dest_path)
 	if dest_dir:
@@ -61,7 +65,7 @@ def generate_page(from_path, template_path, dest_path):
 		dest_file.write(output)
 
 
-def generate_pages_recursive(content_dir, template_path, dest_dir):
+def generate_pages_recursive(base_path, content_dir, template_path, dest_dir):
 	if not os.path.isdir(content_dir):
 		print(f"Content directory '{content_dir}' does not exist.")
 		return
@@ -74,7 +78,7 @@ def generate_pages_recursive(content_dir, template_path, dest_dir):
 			destination_root = dest_dir if relative_root == "." else os.path.join(dest_dir, relative_root)
 			destination_name = os.path.splitext(file_name)[0] + ".html"
 			destination_path = os.path.join(destination_root, destination_name)
-			generate_page(source_path, template_path, destination_path)
+			generate_page(base_path, source_path, template_path, destination_path)
 
 
 def main():
@@ -88,7 +92,7 @@ def main():
 	content_path = os.path.join(base_path, 'content')
 	template_path = os.path.join(base_path, 'template.html')
 	copy(static_path, docs_path)
-	generate_pages_recursive(content_path, template_path, docs_path)
+	generate_pages_recursive(base_path, content_path, template_path, docs_path)
 
 
 if __name__ == '__main__':
