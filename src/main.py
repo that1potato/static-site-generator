@@ -84,11 +84,11 @@ def main():
 		# default to the project root (parent directory of this file's folder)
 		base_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 	static_path = os.path.join(base_path, 'static')
-	doc_path = os.path.join(base_path, 'doc')
+	docs_path = os.path.join(base_path, 'docs')
 	content_path = os.path.join(base_path, 'content')
 	template_path = os.path.join(base_path, 'template.html')
-	copy(static_path, doc_path)
-	generate_pages_recursive(content_path, template_path, doc_path)
+	copy(static_path, docs_path)
+	generate_pages_recursive(content_path, template_path, docs_path)
 
 
 if __name__ == '__main__':
