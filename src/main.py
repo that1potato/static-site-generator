@@ -60,15 +60,29 @@ def generate_page(from_path, template_path, dest_path):
 		dest_file.write(output)
 
 
+def generate_pages_recursive(content_dir, template_path, dest_dir):
+	if not os.path.isdir(content_dir):
+		print(f"Content directory '{content_dir}' does not exist.")
+		return
+	for root, _, files in os.walk(content_dir):
+		relative_root = os.path.relpath(root, content_dir)
+		for file_name in files:
+			if not file_name.lower().endswith(".md"):
+				continue
+			source_path = os.path.join(root, file_name)
+			destination_root = dest_dir if relative_root == "." else os.path.join(dest_dir, relative_root)
+			destination_name = os.path.splitext(file_name)[0] + ".html"
+			destination_path = os.path.join(destination_root, destination_name)
+			generate_page(source_path, template_path, destination_path)
+
+
 def main():
 	static_path = 'static'
 	public_path = 'public'
-	copy(static_path, public_path)
-
-	from_path = 'content/index.md'
+	content_path = 'content'
 	template_path = 'template.html'
-	dest_path = 'public/index.html'
-	generate_page(from_path, template_path, dest_path)
+	copy(static_path, public_path)
+	generate_pages_recursive(content_path, template_path, public_path)
 
 
 if __name__ == '__main__':
