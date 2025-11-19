@@ -2,7 +2,7 @@ import os
 import shutil
 
 from block_util import markdown_to_html_node
-from src.inline_util import extract_title
+from inline_util import extract_title
 
 
 def copy(source, destination):
@@ -64,6 +64,11 @@ def main():
 	static_path = 'static'
 	public_path = 'public'
 	copy(static_path, public_path)
+
+	from_path = 'content/index.md'
+	template_path = 'template.html'
+	dest_path = 'public/index.html'
+	generate_page(from_path, template_path, dest_path)
 
 
 if __name__ == '__main__':
