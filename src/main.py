@@ -7,7 +7,7 @@ from inline_util import extract_title
 
 
 static_path = './static'
-public_path = './public'
+public_path = './docs'
 content_path = './content'
 template_path = './template.html'
 default_base_path = '/'
